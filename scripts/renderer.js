@@ -89,6 +89,11 @@ class Renderer {
             this.drawCircle({x: 400 - i*scale, y: 300 + i*scale}, radius, this.num_curve_sections, color, framebuffer);
             this.drawCircle({x: 400 + i*scale, y: 300 - i*scale}, radius, this.num_curve_sections, color, framebuffer);
             this.drawCircle({x: 400 - i*scale, y: 300 - i*scale}, radius, this.num_curve_sections, color, framebuffer);
+
+            this.drawCircle({x: 500 + i*scale, y: 300}, radius, this.num_curve_sections, color, framebuffer);
+            this.drawCircle({x: 300 - i*scale, y: 300}, radius, this.num_curve_sections, color, framebuffer);
+            this.drawCircle({x: 400, y: 350 + i*scale}, radius, this.num_curve_sections, color, framebuffer);
+            this.drawCircle({x: 400, y: 250 - i*scale}, radius, this.num_curve_sections, color, framebuffer);
         }
     }
 
