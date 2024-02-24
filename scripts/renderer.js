@@ -53,10 +53,26 @@ class Renderer {
         //   - variable `this.num_curve_sections` should be used for `num_edges`
         //   - variable `this.show_points` should be used to determine whether or not to render vertices
         
+        let num_curves = 10;
+
+        // Draw multiple curves with a gradient of blue
+        for(let i=0; i<num_curves; i++) {
+            let v0 = {x: 0, y: 50 + i * 2};
+            let v1 = {x: 50, y: 50 + i * 6 * (i+1)};
+            let v2 = {x: 600, y: 50 + i * 8 * (i+1)};
+            let v3 = {x: 800, y: 50 + i * 4 * (i+1)};
+            let col = [Math.round(255 / num_curves + i), Math.round((255 / num_curves) * (num_curves-i)), 255, 255];
+
+            this.drawBezierCurve(v0, v1, v2, v3, this.num_curve_sections, col, framebuffer);
+
+            let points = [v0, v1, v2, v3];
+            if(this.show_points) {
+                for(let i=0; i<points.length; i++) {
+                    this.drawVertex(points[i], col, framebuffer);
+                }
+            }
+        }
         
-        // Following line is example of drawing a single line
-        // (this should be removed after you implement the curve)
-        this.drawLine({x: 100, y: 100}, {x: 600, y: 300}, [255, 0, 0, 255], framebuffer);
     }
 
     // framebuffer:  canvas ctx image data
@@ -64,8 +80,16 @@ class Renderer {
         // TODO: draw at least 2 circles
         //   - variable `this.num_curve_sections` should be used for `num_edges`
         //   - variable `this.show_points` should be used to determine whether or not to render vertices
-        
-        
+        let num = 20;
+        let scale = 4;
+        let radius = 100;
+        for(let i=0; i<num; i++) {
+            let color = [Math.round((255 / num) * (num-i)), 255, Math.round(255 / num + i), 255];
+            this.drawCircle({x: 400 + i*scale, y: 300 + i*scale}, radius, this.num_curve_sections, color, framebuffer);
+            this.drawCircle({x: 400 - i*scale, y: 300 + i*scale}, radius, this.num_curve_sections, color, framebuffer);
+            this.drawCircle({x: 400 + i*scale, y: 300 - i*scale}, radius, this.num_curve_sections, color, framebuffer);
+            this.drawCircle({x: 400 - i*scale, y: 300 - i*scale}, radius, this.num_curve_sections, color, framebuffer);
+        }
     }
 
     // framebuffer:  canvas ctx image data
@@ -99,11 +123,41 @@ class Renderer {
     // color:        array of int [R, G, B, A]
     // framebuffer:  canvas ctx image data
     drawBezierCurve(p0, p1, p2, p3, num_edges, color, framebuffer) {
-        // TODO: draw a sequence of straight lines to approximate a Bezier curve
-        
-        
-    }
+        // Calculate step size
+        let step = 1.0 / num_edges;
 
+        // Initialize prev x and y
+        let prevX = undefined;
+        let prevY = undefined;
+        
+        // Iterate through t values from 0 to 1 by the step amount
+        for (let t = 0; t < 1; t += step) {
+            // Maths to get x and y along the curve based on t
+            let t1 = 1 - t;
+
+            let x = Math.round(t1**3 * p0.x + 3 * t1**2 * t * p1.x + 3 * t1 * t**2 * p2.x + t**3 * p3.x)
+            let y = Math.round(t1**3 * p0.y + 3 * t1**2 * t * p1.y + 3 * t1 * t**2 * p2.y + t**3 * p3.y)
+            
+            // Draw a line segment from the previous point to the current point
+            if (prevX == undefined && prevY == undefined) {
+                this.drawLine(p0, {x: x, y: y}, color, framebuffer);
+            } else {
+                this.drawLine({x: prevX, y: prevY}, {x: x, y: y}, color, framebuffer);
+            }
+            
+            // Draw vertices if requested
+            if(this.show_points) {
+                this.drawVertex({x: x, y: y}, color, framebuffer);
+                this.drawVertex({x: prevX, y: prevY}, color, framebuffer);
+            }
+
+            // Save current point as previous point for the next loop
+            prevX = x;
+            prevY = y;
+        }
+        this.drawLine({x: prevX, y: prevY}, p3, color, framebuffer);
+    }
+    
     // center:       object {x: __, y: __}
     // radius:       int
     // num_edges:    int
@@ -111,8 +165,31 @@ class Renderer {
     // framebuffer:  canvas ctx image data
     drawCircle(center, radius, num_edges, color, framebuffer) {
         // TODO: draw a sequence of straight lines to approximate a circle
+
+        // Initialize prev x, y
+        let prevX = center.x + radius;
+        let prevY = center.y;
         
-        
+        for (let i=1; i<=num_edges; i++) {
+            // Maths to get x and y from polar coordinates
+            let angle = (360 / num_edges) * i * (Math.PI / 180); // Convert angle to radians
+            let x = Math.round(center.x + radius * Math.cos(angle));
+            let y = Math.round(center.y + radius * Math.sin(angle));
+            console.log("x: " + x + ", y: " + y);
+
+            // Draw a line segment from the previous point to the current point
+            this.drawLine({x: prevX, y: prevY}, {x: x, y: y}, color, framebuffer);
+
+            // Draw vertices if requested
+            if(this.show_points) {
+                this.drawVertex({x: x, y: y}, color, framebuffer);
+                this.drawVertex({x: prevX, y: prevY}, color, framebuffer);
+            }
+
+            // Save current point as previous point for the next loop
+            prevX = x;
+            prevY = y;
+        }        
     }
     
     // vertex_list:  array of object [{x: __, y: __}, {x: __, y: __}, ..., {x: __, y: __}]
@@ -129,8 +206,12 @@ class Renderer {
     // framebuffer:  canvas ctx image data
     drawVertex(v, color, framebuffer) {
         // TODO: draw some symbol (e.g. small rectangle, two lines forming an X, ...) centered at position `v`
-        
-        
+        let v1 = {x: v.x-4, y: v.y+4};
+        let v2 = {x: v.x+4, y: v.y+4};
+        let v3 = {x: v.x-4, y: v.y-4};
+        let v4 = {x: v.x+4, y: v.y-4};
+        this.drawTriangle(v1, v3, v2, color, framebuffer);
+        this.drawTriangle(v2, v4, v3, color, framebuffer);
     }
     
     /***************************************************************
