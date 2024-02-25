@@ -164,7 +164,11 @@ class Renderer {
             this.drawLine(p0, p1, col, framebuffer);
             let p0ctl = {x: 220 + i*5, y: 150};
             let p1ctl = {x: 220 + i*5, y: 400};
-            this.drawBezierCurve(p0, p0ctl, p1ctl, p1, this.num_curve_sections, col, framebuffer);      
+            this.drawBezierCurve(p0, p0ctl, p1ctl, p1, this.num_curve_sections, col, framebuffer);
+            if(this.show_points) {
+                this.drawVertex(p0, col, framebuffer);
+                this.drawVertex(p1, col, framebuffer);
+            }
         }     
     }
 
