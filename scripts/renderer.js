@@ -64,13 +64,6 @@ class Renderer {
             let col = [Math.round(255 / num_curves + i), Math.round((255 / num_curves) * (num_curves-i)), 255, 255];
 
             this.drawBezierCurve(v0, v1, v2, v3, this.num_curve_sections, col, framebuffer);
-
-            let points = [v0, v1, v2, v3];
-            if(this.show_points) {
-                for(let i=0; i<points.length; i++) {
-                    this.drawVertex(points[i], col, framebuffer);
-                }
-            }
         }
         
     }
@@ -156,6 +149,7 @@ class Renderer {
         // TODO: draw your name!
         //   - variable `this.num_curve_sections` should be used for `num_edges`
         //   - variable `this.show_points` should be used to determine whether or not to render vertices
+        // - - - - - - - - DRAW D - - - - - - - -
         let dnum = 8;
         for(let i=0; i<dnum; i++) {
             let p0 = {x: 20 + i*5, y: 150};
@@ -169,7 +163,87 @@ class Renderer {
                 this.drawVertex(p0, col, framebuffer);
                 this.drawVertex(p1, col, framebuffer);
             }
-        }     
+        }
+
+        // - - - - - - - - DRAW y - - - - - - - -
+        let ynum = 40;
+        let p0, p1, col;
+        for(let i=0; i<ynum; i++) {
+            p0 = {x: 220 + i, y: 270};
+            p1 = {x: 270 + i, y: 200};
+            col = [Math.round((255 / ynum) * (ynum-i)), 255, 0, 255];
+            this.drawLine(p0, p1, col, framebuffer);
+            this.drawLine(p1, {x: p0.x, y: p0.y-170}, col, framebuffer);
+            if(this.show_points) {
+                this.drawVertex(p0, col, framebuffer);
+                this.drawVertex(p1, col, framebuffer);
+                this.drawVertex({x: p0.x, y: p0.y-170}, col, framebuffer);
+            }
+        }
+        let vlist = [p0, p1, {x: p0.x + 90, y: p0.y}];
+        col = [0, 0, 0, 255];
+        this.drawConvexPolygon(vlist, col, framebuffer);
+        if(this.show_points) {
+            for(let i=0; i<vlist.length; i++) {
+                this.drawVertex(vlist[i], col, framebuffer);
+            }
+        }
+
+        // - - - - - - - - DRAW l - - - - - - - -
+        let lnum = 45;
+        for(let i=0; i<lnum; i++) {
+            let center = {x: 380, y: 160 + i*5};
+            let r = 10;
+            let col = [255, 255 - Math.round((255 / ynum) * (ynum-i)), 0, 255];
+            this.drawCircle(center, r, this.num_curve_sections, col, framebuffer);
+        }
+
+        // - - - - - - - - DRAW a - - - - - - - -
+        let anum = 8;
+        for(let i=0; i<anum; i++) {
+            let p0 = {x: 540 - i*4, y: 300};
+            let p1 = {x: 540 - i*4, y: 170};
+            let p0c = {x: 420 - i*4, y: 350 + i*5};
+            let p1c = {x: 420 - i*4, y: 120 - i*5};
+            let col = [255 - Math.round((255 / anum) * (anum-i)), 0, 255, 255];
+            this.drawBezierCurve(p0, p0c, p1c, p1, this.num_curve_sections, col, framebuffer);
+        }
+        let vlist_a = [
+            {x: 516, y: 300},
+            {x: 516, y: 170},
+            {x: 580, y: 170},
+            {x: 548, y: 180},
+            {x: 548, y: 300}
+        ];
+        this.drawConvexPolygon(vlist_a, col, framebuffer);
+        if(this.show_points) {
+            for(let i=0; i<vlist_a.length; i++) {
+                this.drawVertex(vlist_a[i], col, framebuffer);
+            }
+        }
+
+        // - - - - - - - - DRAW n - - - - - - - -
+        let nnum = 8;
+        for(let i=0; i<nnum; i++) {
+            let p0 = {x: 600 + i*4, y: 270};
+            let bot1 = {x: 600 + i*4, y: 150};
+            let p0c = {x: p0.x, y: p0.y + 60};
+            let p1 = {x: 690 + i*4, y: 270};
+            let p1c = {x: p1.x, y: p1.y + 60};
+            let bot2 = {x: p1.x, y: 150};
+            let col = [0, 200, 255 - Math.round((255 / nnum) * (nnum-i)), 255];
+
+            this.drawLine(p0, bot1, col, framebuffer);
+            this.drawBezierCurve(p0, p0c, p1c, p1, this.num_curve_sections, col, framebuffer);
+            this.drawLine(p1, bot2, col, framebuffer);
+
+            let v = [p0, bot1, p0c, p1, p1c, bot2];
+            if(this.show_points) {
+                for(let i=0; i<v.length; i++) {
+                    this.drawVertex(v[i], col, framebuffer);
+                }
+            }
+        }
     }
 
     // p0:           object {x: __, y: __}
@@ -206,6 +280,8 @@ class Renderer {
             if(this.show_points) {
                 this.drawVertex({x: x, y: y}, color, framebuffer);
                 this.drawVertex({x: prevX, y: prevY}, color, framebuffer);
+                this.drawVertex(p1, color, framebuffer);
+                this.drawVertex(p2, color, framebuffer);
             }
 
             // Save current point as previous point for the next loop
