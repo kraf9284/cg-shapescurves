@@ -102,13 +102,53 @@ class Renderer {
         // TODO: draw at least 2 convex polygons (each with a different number of vertices >= 5)
         //   - variable `this.show_points` should be used to determine whether or not to render vertices
         
-        
-        // Following lines are example of drawing a single triangle
-        // (this should be removed after you implement the polygon)
-        let point_a = {x:  80, y:  40};
-        let point_b = {x: 320, y: 160};
-        let point_c = {x: 240, y: 360};
-        this.drawTriangle(point_a, point_c, point_b, [0, 128, 128, 255], framebuffer);
+        let vx1 = [
+            {x: 300, y: 200}, 
+            {x: 400, y: 250}, 
+            {x: 420, y: 350}, 
+            {x: 410, y: 470}, 
+            {x: 320, y: 520},
+            {x: 150, y: 400},
+            {x: 200, y: 270}
+        ];
+        let vx2 = [
+            {x: 400, y: 100}, 
+            {x: 500, y: 150}, 
+            {x: 550, y: 250}, 
+            {x: 510, y: 370}, 
+            {x: 420, y: 420},
+            {x: 300, y: 400},
+            {x: 250, y: 300},
+            {x: 240, y: 220},
+            {x: 280, y: 160}
+        ];
+        let vx3 = [
+            {x: 300, y: 200}, 
+            {x: 400, y: 220},
+            {x: 450, y: 370}, 
+            {x: 420, y: 420},
+            {x: 300, y: 400},
+            {x: 250, y: 300},
+            {x: 240, y: 220}
+        ];
+        let vlists = [vx1, vx2, vx3];
+
+        let col1 = [255, 0, 0, 255];
+        let col2 = [0, 0, 255, 255];
+        let col3 = [200, 0, 255, 255];
+        let clists = [col1, col2, col3];
+
+        this.drawConvexPolygon(vx1, col1, framebuffer);
+        this.drawConvexPolygon(vx2, col2, framebuffer);
+        this.drawConvexPolygon(vx3, col3, framebuffer);
+
+        if(this.show_points) {
+            for(let i=0; i<vlists.length; i++) {
+                for(let j=0; j<vlists[i].length; j++) {
+                    this.drawVertex(vlists[i][j], clists[i], framebuffer);
+                }
+            }
+        }
     }
 
     // framebuffer:  canvas ctx image data
@@ -116,8 +156,16 @@ class Renderer {
         // TODO: draw your name!
         //   - variable `this.num_curve_sections` should be used for `num_edges`
         //   - variable `this.show_points` should be used to determine whether or not to render vertices
-        
-        
+        let dnum = 8;
+        for(let i=0; i<dnum; i++) {
+            let p0 = {x: 20 + i*5, y: 150};
+            let p1 = {x: 20 + i*5, y: 400};
+            let col = [0, Math.round((255 / dnum) * (dnum-i)), 255, 255];
+            this.drawLine(p0, p1, col, framebuffer);
+            let p0ctl = {x: 220 + i*5, y: 150};
+            let p1ctl = {x: 220 + i*5, y: 400};
+            this.drawBezierCurve(p0, p0ctl, p1ctl, p1, this.num_curve_sections, col, framebuffer);      
+        }     
     }
 
     // p0:           object {x: __, y: __}
@@ -180,7 +228,6 @@ class Renderer {
             let angle = (360 / num_edges) * i * (Math.PI / 180); // Convert angle to radians
             let x = Math.round(center.x + radius * Math.cos(angle));
             let y = Math.round(center.y + radius * Math.sin(angle));
-            console.log("x: " + x + ", y: " + y);
 
             // Draw a line segment from the previous point to the current point
             this.drawLine({x: prevX, y: prevY}, {x: x, y: y}, color, framebuffer);
@@ -202,8 +249,9 @@ class Renderer {
     // framebuffer:  canvas ctx image data
     drawConvexPolygon(vertex_list, color, framebuffer) {
         // TODO: draw a sequence of triangles to form a convex polygon
-        
-        
+        for(let i=1; i<vertex_list.length-1; i++) {
+            this.drawTriangle(vertex_list[0], vertex_list[i], vertex_list[i+1], color, framebuffer);
+        }
     }
     
     // v:            object {x: __, y: __}
@@ -215,8 +263,14 @@ class Renderer {
         let v2 = {x: v.x+4, y: v.y+4};
         let v3 = {x: v.x-4, y: v.y-4};
         let v4 = {x: v.x+4, y: v.y-4};
+        let vx = [v1, v2, v3, v4];
         this.drawTriangle(v1, v3, v2, color, framebuffer);
         this.drawTriangle(v2, v4, v3, color, framebuffer);
+
+        this.drawLine(v1, v2, [0, 0, 0, 255], framebuffer);
+        this.drawLine(v2, v4, [0, 0, 0, 255], framebuffer);
+        this.drawLine(v4, v3, [0, 0, 0, 255], framebuffer);
+        this.drawLine(v3, v1, [0, 0, 0, 255], framebuffer);
     }
     
     /***************************************************************
