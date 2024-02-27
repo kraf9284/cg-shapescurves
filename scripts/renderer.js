@@ -316,6 +316,7 @@ class Renderer {
             if(this.show_points) {
                 this.drawVertex({x: x, y: y}, color, framebuffer);
                 this.drawVertex({x: prevX, y: prevY}, color, framebuffer);
+                this.drawVertex(center, color, framebuffer);
             }
 
             // Save current point as previous point for the next loop
